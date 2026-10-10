@@ -1,3 +1,7 @@
-export default function Button({ children, className = "" }) {
-    return <button className={`rounded-lg ${className}`}>{children} </button>;
+export default function Button({ onClick, children, className = "" }) {
+    return (
+        <button onClick={onClick} className={`rounded-lg ${className}`}>
+            {children}{" "}
+        </button>
+    );
 }

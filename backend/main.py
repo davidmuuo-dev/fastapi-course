@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException, status
 
 app = FastAPI()
 origins = ["http://localhost:5173"]
@@ -67,3 +68,11 @@ posts: list[dict] = [
 @app.get("/posts")
 def home_page():
     return posts
+
+
+@app.get("/posts/{post_id}")
+def get_post(post_id: int):
+    for post in posts:
+        if post["id"] == post_id:
+            return post
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not Found")
