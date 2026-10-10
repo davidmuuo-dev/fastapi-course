@@ -2,23 +2,36 @@ import mainApi from "../APIs.jsx";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import Button from "./Button.jsx";
+import Error from "./Error.jsx";
 
 export default function Posts() {
     const [post, setPost] = useState([]);
     const [loading, setLoading] = useState(true);
     const { post_id } = useParams();
+    const [error, setError] = useState(null);
     useEffect(() => {
         async function getPosts() {
             try {
+                setLoading(true);
+                setError(null);
                 const response = await mainApi.get(`/${post_id}`);
                 console.log(response.data);
                 setPost(response.data);
             } catch (error) {
-                console.error(error);
-                console.log(error.response?.data);
+                const detail = error.response?.data?.detail;
+
+                const message = Array.isArray(detail)
+                    ? detail.map(item => item.msg).join(", ")
+                    : typeof detail === "string"
+                      ? detail
+                      : "Something went wrong.";
+
+                setError({
+                    status: error.response?.status || 500,
+                    message
+                });
             } finally {
                 setLoading(false);
-                console.log("Request complete");
             }
         }
         getPosts();
@@ -26,6 +39,10 @@ export default function Posts() {
 
     function handleBack() {
         window.location = "/";
+    }
+
+    if (error) {
+        return <Error status={error.status} message={error.message} />;
     }
 
     return (
@@ -66,7 +83,7 @@ export default function Posts() {
                                     <Button className="px-5 py-1 font-bold text-sky-500 ">
                                         Edit
                                     </Button>
-                                    <Button className="font-bold px-5 py-1 text-red-500 text-black">
+                                    <Button className="font-bold px-5 py-1 text-red-500 ">
                                         Delete
                                     </Button>
                                 </div>

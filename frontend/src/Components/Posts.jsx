@@ -24,7 +24,7 @@ export default function Posts() {
         <>
             <div>
                 {loading ? (
-                    <p className="bg-sky-400 rounded-lg animate-pulse p-2 m-2">
+                    <p className="bg-gray-400 rounded-lg animate-pulse p-2 m-2">
                         Loading...
                     </p>
                 ) : (
