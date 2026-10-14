@@ -1,7 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException, status
-from schemas import PostCreate, PostResponse
+from schemas import PostCreate, PostResponse, UserCreate, UserResponse
+from typing import Annotated
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+import models
+from database import Base, engine, get_db
+
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 origins = ["http://localhost:5173"]
@@ -12,61 +20,93 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-posts: list[dict] = [
-    {
-        "id": 1,
-        "author": "David Muuo",
-        "title": "FastAPI is awesome",
-        "content": "This framework is super fast and easy to learn. I built my first API in 10 minutes!",
-        "date_posted": "April 20, 2024",
-    },
-    {
-        "id": 2,
-        "author": "David Muuo",
-        "title": "Why I love Python",
-        "content": "Python makes backend development simple. From data analysis to web APIs, it does everything.",
-        "date_posted": "April 21, 2024",
-    },
-    {
-        "id": 3,
-        "author": "Sarah Kim",
-        "title": "Learning to Code in 2024",
-        "content": "Started my coding journey 3 months ago. Consistency is more important than speed.",
-        "date_posted": "April 22, 2024",
-    },
-    {
-        "id": 4,
-        "author": "John Doe",
-        "title": "My Expense Tracker Project",
-        "content": "Building an expense tracker to manage my daily spending. Frontend is React, backend is FastAPI.",
-        "date_posted": "May 01, 2024",
-    },
-]
+
+
+# --------------------------
+# User creation endpoint
+# --------------------------
+@app.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
+    username_result = db.execute(
+        select(models.User).where(models.User.username == user.username)
+    )
+    existing_user = username_result.scalars().first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
+        )
+
+    email_result = db.execute(
+        select(models.User).where(models.User.email == user.email)
+    )
+    existing_email = email_result.scalars().first()
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists"
+        )
+
+    new_user = models.User(username=user.username, email=user.email)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+# --------------------------------------
+# Getting single User  endpoint
+# ---------------------------------------
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if user:
+        return user
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not Found")
+
+
+# --------------------------------
+# Getting user posts endpoint
+# -------------------------------
+@app.get("/users/{user_id}/posts", response_model=list[PostResponse])
+def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    user = db.execute(select(models.User).where(models.User.id == user_id))
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+    result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
+    posts = result.scalars().all()
+    return posts
 
 
 @app.get("/", response_model=list[PostResponse])
 @app.get("/posts", response_model=list[PostResponse])
-def home_page():
+def home_page(db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post))
+    posts = result.scalars().all()
     return posts
 
 
 @app.get("/posts/{post_id}", response_model=PostResponse)
-def get_post(post_id: int):
-    for post in posts:
-        if post["id"] == post_id:
-            return post
+def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
+    if post:
+        return post
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not Found")
 
 
 @app.post("/posts", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
-def create_post(post: PostCreate):
-    new_id = max(p["id"] for p in posts) + 1 if posts else 1
-    new_post = {
-        "id": new_id,
-        "author": post.author,
-        "title": post.title,
-        "content": post.content,
-        "date_posted": "May 23,2027",
-    }
-    posts.append(new_post)
+def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.User).where(models.User.id == post.user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+    new_post = models.Post(title=post.title, content=post.content, user_id=post.user_id)
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
     return new_post
