@@ -18,7 +18,7 @@ export default function Posts() {
                 setPost(response.data);
             } catch (error) {
                 const detail = error.response?.data?.detail;
-
+                const status_code = error?.code;
                 const message = Array.isArray(detail)
                     ? detail.map(item => item.msg).join(", ")
                     : typeof detail === "string"
@@ -27,7 +27,8 @@ export default function Posts() {
 
                 setError({
                     status: error.response?.status || 500,
-                    message
+                    message,
+                    status_code
                 });
             } finally {
                 setLoading(false);
@@ -41,7 +42,13 @@ export default function Posts() {
     }
 
     if (error) {
-        return <Error status={error.status} message={error.message} />;
+        return (
+            <Error
+                status_code={error.status_code}
+                status={error.status}
+                message={error.message}
+            />
+        );
     }
 
     return (

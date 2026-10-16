@@ -1,5 +1,5 @@
 import Button from "./Button.jsx";
-export default function Error({ status, message }) {
+export default function Error({ status_code = "Error", status, message }) {
     function handleBack() {
         window.location = "/";
     }
@@ -7,7 +7,7 @@ export default function Error({ status, message }) {
     return (
         <main className="rounded-sm border mt-3 m-auto w-[95%] shadow-2xl shadow-black/50 max-w-160   border-red-200">
             <h1 className="bg-red-100 font-medium text-red-700 p-1 ">
-                {status}
+                {status_code}
             </h1>
             <h2 className="p-2 text-sm font-bold">
                 Error...
