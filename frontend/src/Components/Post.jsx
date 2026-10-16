@@ -15,7 +15,6 @@ export default function Posts() {
                 setLoading(true);
                 setError(null);
                 const response = await mainApi.get(`/${post_id}`);
-                console.log(response.data);
                 setPost(response.data);
             } catch (error) {
                 const detail = error.response?.data?.detail;
@@ -64,12 +63,21 @@ export default function Posts() {
                                         {post.title}
                                     </p>
                                     <p className="text-xs text-gray-700 underline">
-                                        {post.author}
+                                        {post.author.username}
                                     </p>
                                 </div>
-                                <p className="text-xs text-gray-700">
-                                    {post.date_posted}
-                                </p>
+                                <div className="flex flex-col items-end">
+                                    <p className="text-xs text-gray-700">
+                                        {new Date(
+                                            post.date_posted
+                                        ).toLocaleDateString()}
+                                    </p>
+                                    <p className="text-xs text-gray-700">
+                                        {new Date(
+                                            post.date_posted
+                                        ).toLocaleTimeString()}
+                                    </p>
+                                </div>
                             </div>
                             <p className="mt-2 text-sm ">{post.content}</p>
                             <div className="mt-5 flex justify-between">

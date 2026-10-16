@@ -44,12 +44,21 @@ export default function Posts() {
                                                 </p>
                                             </Link>
                                             <p className="text-xs text-gray-700 underline">
-                                                {post.author}
+                                                {post.author.username}
                                             </p>
                                         </div>
-                                        <p className="text-xs text-gray-700">
-                                            {post.date_posted}
-                                        </p>
+                                        <div className="flex flex-col items-end">
+                                            <p className="text-xs text-gray-700">
+                                                {new Date(
+                                                    post.date_posted
+                                                ).toLocaleDateString()}
+                                            </p>
+                                            <p className="text-xs text-gray-700">
+                                                {new Date(
+                                                    post.date_posted
+                                                ).toLocaleTimeString()}
+                                            </p>
+                                        </div>
                                     </div>
                                     <p className="mt-2 text-sm line-clamp-1">
                                         {post.content}
