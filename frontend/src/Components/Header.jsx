@@ -1,6 +1,6 @@
 import Button from "./Button.jsx";
 
-export default function Header({ loginStatus }) {
+export default function Header({ loginStatus, onClick }) {
     return (
         <header className="flex items-center justify-between border-b border-gray-200">
             <p>LOGO</p>
@@ -11,6 +11,12 @@ export default function Header({ loginStatus }) {
                     </Button>
                 ) : (
                     <div className="flex gap-2">
+                        <Button
+                            onClick={onClick}
+                            className="border-2 border-gray-900 bg-gray-300 backdrop-blur-2xl text-gray-900 px-5 py-1"
+                        >
+                            New Post
+                        </Button>
                         <Button className="border-2 border-gray-900 bg-gray-300 backdrop-blur-2xl text-gray-900 px-5 py-1">
                             Register
                         </Button>
