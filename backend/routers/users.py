@@ -1,12 +1,12 @@
 from typing import Annotated
+
+import models
+import sqlalchemy.orm
+from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
+from schemas import PostResponse, UserCreate, UserResponse, UserUpdate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-import models
-from database import get_db
-from schemas import PostResponse, UserCreate, UserResponse, UserUpdate
-
 
 router = APIRouter()
 
@@ -55,7 +55,7 @@ async def get_all_user(db: Annotated[AsyncSession, Depends(get_db)]):
 # Getting single User  endpoint
 # ---------------------------------------
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_user_post(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
     if user:
@@ -76,7 +76,7 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
         )
     result = await db.execute(
         select(models.Post)
-        .options(selectinload(models.Post.author))
+        .options(sqlalchemy.orm.selectinload(models.Post.author))
         .where(models.Post.user_id == user_id)
     )
     posts = result.scalars().all()

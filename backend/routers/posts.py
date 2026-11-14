@@ -1,11 +1,12 @@
 from typing import Annotated
+
+import models
+from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
+from schemas import PostCreate, PostResponse, PostUpdate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-import models
-from database import get_db
-from schemas import PostCreate, PostResponse, PostUpdate
 
 router = APIRouter()
 
@@ -14,7 +15,8 @@ router = APIRouter()
 # Getting home / posts endpoint
 # -------------------------------
 @router.get("", response_model=list[PostResponse])
-async def home_page(db: Annotated[Session, Depends(get_db)]):
+@router.get("/", response_model=list[PostResponse])
+async def home_page(db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
         select(models.Post).options(selectinload(models.Post.author))
     )
