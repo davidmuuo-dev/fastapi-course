@@ -1,11 +1,13 @@
 import { useState } from "react";
+import Button from "./Button.jsx"
 export default function RequestMessage({ state, stateMessage }) {
     const [openModal, setOpenModal] = useState(true);
     const handleCloseModal = () => {
         setOpenModal(false);
     };
     return (
-        <dialog
+       <>
+       {openModal &&  <dialog
             open
             className=" w-[75%] m-auto rounded-sm border border-blue-500  mt-0.4 z-999 bg-gray-200 backdrop-blur-lg absolute left-0 top-0"
         >
@@ -25,6 +27,7 @@ export default function RequestMessage({ state, stateMessage }) {
             >
                 Back
             </Button>
-        </dialog>
+        </dialog>}
+       </>
     );
 }
