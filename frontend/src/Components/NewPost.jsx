@@ -2,10 +2,10 @@ import { useRef } from "react";
 import mainApi from "../APIs";
 
 export default function DataPopup({
-  modalOpen,
+  newPostModalOpen,
   setStateMessage,
   setState,
-  setModalOpen,
+  setnewPostModalOpen,
   setOpenMessageModal,
   setMessageStatus,
   setStatusText,
@@ -22,7 +22,7 @@ export default function DataPopup({
       setStateMessage(`Post ${response.statusText} Succesfully`);
       setMessageStatus(response.status);
       setStatusText(response.statusText);
-      setModalOpen(false);
+      setnewPostModalOpen(false);
       setOpenMessageModal(true);
       console.log(response);
     } catch (error) {
@@ -53,19 +53,19 @@ export default function DataPopup({
       }
 
       setState("error");
-      setModalOpen(false);
+      newPostModalOpen(false);
       setOpenMessageModal(true);
 
       console.log(error.response || error.request || error.message);
     }
   }
   const handleCloseNewPostForm = () => {
-    setModalOpen(false);
+    newPostModalOpen(false);
   };
   return (
     <>
       {" "}
-      {modalOpen && (
+      {newPostModalOpen && (
         <>
           <dialog
             open

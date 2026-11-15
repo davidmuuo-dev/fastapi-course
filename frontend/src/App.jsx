@@ -9,17 +9,18 @@ import Error from "./Components/Error.jsx";
 import NewPost from "./Components/NewPost.jsx";
 import RequestMessage from "./Components/RequestMessage.jsx";
 
+
 function App() {
    const [loginStatus, setLoginStatus] = useState(true);
    const [openMessageModal, setOpenMessageModal] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
+    const [newPostModalOpen, setnewPostModalOpen] = useState(false);
     const [state, setState] = useState("Success");
     const [stateMessage, setStateMessage] = useState("");
     const [messageStatus, setMessageStatus] = useState("");
     const [statusText, setStatusText] = useState("");
 
     const handleOpenNewPostForm = () => {
-        setModalOpen(true);
+        setnewPostModalOpen(true);
     };
     return (
         <div className="min-h-screen relative min-w-screen bg-gray-100">
@@ -31,7 +32,8 @@ function App() {
                 messageStatus={messageStatus}
                 statusText={statusText}
             />
-            <NewPost setMessageStatus={setMessageStatus} setStatusText={setStatusText} modalOpen={modalOpen} setModalOpen={setModalOpen} setStateMessage={setStateMessage} setState={setState} openMessageModal={openMessageModal} setOpenMessageModal={setOpenMessageModal} />
+            <NewPost setMessageStatus={setMessageStatus} setStatusText={setStatusText} newPostModalOpen={newPostModalOpen} setnewPostModalOpen={setnewPostModalOpen} setStateMessage={setStateMessage} setState={setState} openMessageModal={openMessageModal} setOpenMessageModal={setOpenMessageModal} />
+          
             <Header loginStatus={loginStatus} setLoginStatus={setLoginStatus}  onClick={handleOpenNewPostForm} />
             <Routes>
                 <Route path="/" element={<Posts />}></Route>
@@ -40,7 +42,7 @@ function App() {
                     path="*"
                     element={<Error status={404} message="Page not Found" />}
                 />
-                <Route path="/posts/:post_id" element={<Post />}></Route>
+                <Route path="/posts/:post_id" element={<Post setStateMessage={setStateMessage} setState={setState} setOpenMessageModal={setOpenMessageModal} setMessageStatus={setMessageStatus} setStatusText={setStatusText} />}></Route>
             </Routes>
         </div>
     );

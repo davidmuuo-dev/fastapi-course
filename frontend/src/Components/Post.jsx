@@ -3,110 +3,115 @@ import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import Button from "./Button.jsx";
 import Error from "./Error.jsx";
+import EditPost from "./EditPost.jsx";
+import DeleteModal from "./DeleteModal.jsx";
 
-export default function Posts() {
-    const [post, setPost] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const { post_id } = useParams();
-    const [error, setError] = useState(null);
-    useEffect(() => {
-        async function getPosts() {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await mainApi.get(`/${post_id}`);
-                setPost(response.data);
-            } catch (error) {
-                const detail = error.response?.data?.detail;
-                const status_code = error?.code;
-                const message = Array.isArray(detail)
-                    ? detail.map(item => item.msg).join(", ")
-                    : typeof detail === "string"
-                      ? detail
-                      : "Something went wrong.";
+export default function Post({setStateMessage,setState,setOpenMessageModal,setMessageStatus,setStatusText}) {
+  const [post, setPost] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { post_id } = useParams();
+  const [error, setError] = useState(null);
+  const [editPostModalOpen, setEditPostModalOpen] = useState(false);
+  const [openDeleteModal,setOpenDeleteModal] = useState(false)
+  useEffect(() => {
+    async function getPosts() {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await mainApi.get(`/${post_id}`);
+        setPost(response.data);
+      } catch (error) {
+        const detail = error.response?.data?.detail;
+        const status_code = error?.code;
+        const message = Array.isArray(detail)
+          ? detail.map((item) => item.msg).join(", ")
+          : typeof detail === "string"
+            ? detail
+            : "Something went wrong.";
 
-                setError({
-                    status: error.response?.status || 500,
-                    message,
-                    status_code
-                });
-            } finally {
-                setLoading(false);
-            }
-        }
-        getPosts();
-    }, []);
-
-    function handleBack() {
-        window.location = "/";
+        setError({
+          status: error.response?.status || 500,
+          message,
+          status_code,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
+    getPosts();
+  }, [post_id]);
 
-    if (error) {
-        return (
-            <Error
-                status_code={error.status_code}
-                status={error.status}
-                message={error.message}
-            />
-        );
-    }
+  function handleBack() {
+    window.location = "/";
+  }
 
+  if (error) {
     return (
-        <>
-            <div>
-                {loading ? (
-                    <p className="bg-gray-400 rounded-lg animate-pulse p-2 m-2">
-                        Loading...
-                    </p>
-                ) : (
-                    <div className=" flex flex-col gap-2 p-2">
-                        <div
-                            className="bg-gray-200 rounded-lg p-2"
-                            key={post.id}
-                        >
-                            <div className="flex justify-between">
-                                <div className="flex justify-baseline gap-0.5 flex-col">
-                                    <p className="font-medium text-blue-500">
-                                        {post.title}
-                                    </p>
-                                    <p className="text-xs text-gray-700 underline">
-                                        {post.author.username}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <p className="text-xs text-gray-700">
-                                        {new Date(
-                                            post.date_posted
-                                        ).toLocaleDateString()}
-                                    </p>
-                                    <p className="text-xs text-gray-700">
-                                        {new Date(
-                                            post.date_posted
-                                        ).toLocaleTimeString()}
-                                    </p>
-                                </div>
-                            </div>
-                            <p className="mt-2 text-sm ">{post.content}</p>
-                            <div className="mt-5 flex justify-between">
-                                <Button
-                                    onClick={handleBack}
-                                    className="px-5 py-1 text-black font-bold "
-                                >
-                                    Back
-                                </Button>
-                                <div className="flex gap-2 items-center">
-                                    <Button className="px-5 py-1 font-bold text-sky-500 ">
-                                        Edit
-                                    </Button>
-                                    <Button className="font-bold px-5 py-1 text-red-500 ">
-                                        Delete
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </>
+      <Error
+        status_code={error.status_code}
+        status={error.status}
+        message={error.message}
+      />
     );
+  }
+
+  return (
+    <>
+      <div>
+        {loading ? (
+          <p className="bg-gray-400 rounded-lg animate-pulse p-2 m-2">
+            Loading...
+          </p>
+        ) : (
+          <div className=" flex flex-col gap-2 p-2">
+            <EditPost post={post} setMessageStatus={setMessageStatus} setStatusText={setStatusText} editPostModalOpen={editPostModalOpen} setEditPostModalOpen={setEditPostModalOpen} setStateMessage={setStateMessage} setState={setState} setOpenMessageModal={setOpenMessageModal} />
+            <DeleteModal setStateMessage={setStateMessage} setMessageStatus={setMessageStatus} setStatusText={setStatusText} setOpenMessageModal={setOpenMessageModal} setState={setState} setOpenDeleteModal={setOpenDeleteModal} openDeleteModal={openDeleteModal} post={post}  />
+            <div
+              className="bg-gray-200 rounded-lg p-2 md:max-w-150"
+              key={post.id}
+            >
+              <div className="flex justify-between">
+                <div className="flex justify-baseline gap-0.5 flex-col">
+                  <p className="font-medium text-blue-500">{post.title}</p>
+                  <p className="text-xs text-gray-700 underline">
+                    {post.author.username}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end">
+                  <p className="text-xs text-gray-700">
+                    {new Date(post.date_posted).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs text-gray-700">
+                    {new Date(post.date_posted).toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-2 text-sm ">{post.content}</p>
+              <div className="mt-5 flex justify-between">
+                <Button
+                  onClick={handleBack}
+                  className="px-5 py-1 text-black font-bold "
+                >
+                  Back
+                </Button>
+                <div className="flex gap-2 items-center">
+                  {post.user_id == 3 && (
+                    <Button
+                      onClick={() => setEditPostModalOpen(true)}
+                      className="px-5 py-1 font-bold text-sky-500 "
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  <Button onClick={()=> setOpenDeleteModal(true)} className="font-bold px-5 py-1 text-red-500 ">
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
