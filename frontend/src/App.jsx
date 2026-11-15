@@ -10,8 +10,13 @@ import NewPost from "./Components/NewPost.jsx";
 import RequestMessage from "./Components/RequestMessage.jsx";
 
 function App() {
-    const [loginStatus, setLoginStatus] = useState(false);
+   const [loginStatus, setLoginStatus] = useState(true);
+   const [openMessageModal, setOpenMessageModal] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [state, setState] = useState("Success");
+    const [stateMessage, setStateMessage] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
+    const [statusText, setStatusText] = useState("");
 
     const handleOpenNewPostForm = () => {
         setModalOpen(true);
@@ -19,11 +24,15 @@ function App() {
     return (
         <div className="min-h-screen relative min-w-screen bg-gray-100">
             <RequestMessage
-                state="error"
-                stateMessage="NetWork Error. Please try again later"
+                state={state}
+                stateMessage={stateMessage}
+                openMessageModal={openMessageModal}
+                setOpenMessageModal={setOpenMessageModal}
+                messageStatus={messageStatus}
+                statusText={statusText}
             />
-            <NewPost modalOpen={modalOpen} setModalOpen={setModalOpen} />
-            <Header loginStatus={loginStatus} onClick={handleOpenNewPostForm} />
+            <NewPost setMessageStatus={setMessageStatus} setStatusText={setStatusText} modalOpen={modalOpen} setModalOpen={setModalOpen} setStateMessage={setStateMessage} setState={setState} openMessageModal={openMessageModal} setOpenMessageModal={setOpenMessageModal} />
+            <Header loginStatus={loginStatus} setLoginStatus={setLoginStatus}  onClick={handleOpenNewPostForm} />
             <Routes>
                 <Route path="/" element={<Posts />}></Route>
                 <Route path="/posts" element={<Posts />}></Route>

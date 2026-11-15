@@ -1,32 +1,37 @@
-import { useState } from "react";
 import Button from "./Button.jsx"
-export default function RequestMessage({ state, stateMessage }) {
-    const [openModal, setOpenModal] = useState(true);
+export default function RequestMessage({ state, stateMessage,openMessageModal,setOpenMessageModal,messageStatus,statusText }) {
     const handleCloseModal = () => {
-        setOpenModal(false);
+        setOpenMessageModal(false);
+        window.location.reload()
     };
     return (
        <>
-       {openModal &&  <dialog
+       {openMessageModal &&  <dialog
             open
-            className=" w-[75%] m-auto rounded-sm border border-blue-500  mt-0.4 z-999 bg-gray-200 backdrop-blur-lg absolute left-0 top-0"
+            className=" w-[75%] md:max-w-150 m-auto rounded-sm border border-blue-500  mt-0.4 z-999 bg-gray-200 backdrop-blur-lg absolute left-0 top-0"
         >
-            <p
-                className={
+           <div className={
                     state === "error"
-                        ? "text-xs w-full bg-red-200 border-b-2 border-red-600 rounded-y-sm"
-                        : "text-xs w-full bg-green-200 border-b-2 border-green-600 rounded-sm"
-                }
+                        ? "text-lg w-full bg-red-200 border-b-2 border-red-600 rounded-y-sm flex justify-between p-1.5 "
+                        : "text-xs w-full bg-green-200 border-b-2 border-green-600 rounded-sm  flex justify-between p-1.5"
+                }>
+             <p
+                
             >
                 {state === "error" ? "Error Message" : "Success Message"}
             </p>
-            <p className="text-sm font-sans text-gray-700">{stateMessage}</p>
-            <Button
+            <div className="flex gap-2">
+                <p>{messageStatus}</p>
+                <p>{statusText}</p>
+            </div>
+           </div>
+            <p className="text-xl font-bold font-sans text-gray-900">{stateMessage}</p>
+         <div className="w-full flex justify-end">   <Button
                 onClick={handleCloseModal}
-                className="px-5 py-1 text-gray-700 font-bold "
+                className="px-5 py-1 text-gray-700 font-bold mt-3 "
             >
-                Back
-            </Button>
+                Close
+            </Button></div>
         </dialog>}
        </>
     );

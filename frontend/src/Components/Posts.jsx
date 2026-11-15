@@ -1,7 +1,6 @@
 import mainApi from "../APIs.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import Spinner from "../assets/spinner.svg";
 export default function Posts() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,7 +13,6 @@ export default function Posts() {
                 console.error(error);
             } finally {
                 setLoading(false);
-                console.log("Request complete");
             }
         }
         getPosts();
@@ -49,7 +47,7 @@ export default function Posts() {
                         {posts.map(post => {
                             return (
                                 <div
-                                    className="bg-gray-200 backdrop-blur-xl rounded-lg p-2"
+                                    className="bg-gray-200 backdrop-blur-xl rounded-lg p-2 md:max-w-200"
                                     key={post.id}
                                 >
                                     <div>
