@@ -1,6 +1,6 @@
-export default function Button({ onClick, children, className = "" }) {
+export default function Button({ onClick, type,children, className = "" }) {
     return (
-        <button onClick={onClick} className={`rounded-lg ${className}`}>
+        <button onClick={onClick} type={type} className={`rounded-lg ${className}`}>
             {children}{" "}
         </button>
     );

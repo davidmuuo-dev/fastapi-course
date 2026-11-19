@@ -8,6 +8,8 @@ import Post from "./Components/Post.jsx";
 import Error from "./Components/Error.jsx";
 import NewPost from "./Components/NewPost.jsx";
 import RequestMessage from "./Components/RequestMessage.jsx";
+import Register from "./Components/Register.jsx";
+import Login from "./Components/Login.jsx";
 
 
 function App() {
@@ -23,7 +25,7 @@ function App() {
         setnewPostModalOpen(true);
     };
     return (
-        <div className="min-h-screen relative min-w-screen bg-gray-100">
+        <div className="min-h-screen relative min-w-screen bg-slate-950">
             <RequestMessage
                 state={state}
                 stateMessage={stateMessage}
@@ -38,6 +40,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<Posts />}></Route>
                 <Route path="/posts" element={<Posts />}></Route>
+                <Route path="/register" element={<Register />}></Route>
+                <Route path="/login" element={<Login />}></Route>
                 <Route
                     path="*"
                     element={<Error status={404} message="Page not Found" />}
