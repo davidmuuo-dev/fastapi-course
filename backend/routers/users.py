@@ -1,11 +1,21 @@
+from datetime import timedelta
 from typing import Annotated
 
 import models
 import sqlalchemy.orm
+from auth import (
+    create_access_token,
+    hash_password,
+    oauth2_scheme,
+    verify_access_token,
+    verify_password,
+)
+from config import settings
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas import PostResponse, UserCreate, UserResponse, UserUpdate
-from sqlalchemy import select
+from fastapi.security import OAuth2PasswordRequestForm
+from schemas import PostResponse, Token, UserCreate, UserPrivate, UserPublic, UserUpdate
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
@@ -14,10 +24,12 @@ router = APIRouter()
 # --------------------------
 # User creation endpoint
 # --------------------------
-@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UserPrivate, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     username_result = await db.execute(
-        select(models.User).where(models.User.username == user.username)
+        select(models.User).where(
+            func.lower(models.User.username) == user.username.lower()
+        )
     )
     existing_user = username_result.scalars().first()
     if existing_user:
@@ -26,7 +38,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
         )
 
     email_result = await db.execute(
-        select(models.User).where(models.User.email == user.email)
+        select(models.User).where(func.lower(models.User.email) == user.email.lower())
     )
     existing_email = email_result.scalars().first()
     if existing_email:
@@ -34,7 +46,11 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists"
         )
 
-    new_user = models.User(username=user.username, email=user.email)
+    new_user = models.User(
+        username=user.username,
+        email=user.email.lower(),
+        hash_password_hash=hash_password(user.password),
+    )
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
@@ -44,17 +60,62 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
 # --------------------------------
 # Getting  all users endpoint
 # -------------------------------
-@router.get("", response_model=list[UserResponse])
+@router.get("", response_model=list[UserPublic])
 async def get_all_user(db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User))
     users = result.scalars().all()
     return users
 
 
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    result = await db.execute(
+        select(models.User).where(func.lower(models.User.email))
+        == form_data.username.lower()
+    )
+    user = result.scalar().first()
+    if not user or not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect Password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": str(user.id)}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")
+
+
+##############################################################################################################################
+@router.get("/me", response_model=UserPrivate)
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    user_id = verify_access_token(token)
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or Expired Token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    try:
+        user_id: int = int(user_id)
+    except (TypeError, ValueError):
+        raise HTTPException
+
+
+#############################################################################################################################
+
+
 # --------------------------------------
 # Getting single User  endpoint
 # ---------------------------------------
-@router.get("/{user_id}", response_model=UserResponse)
+@router.get("/{user_id}", response_model=UserPublic)
 async def get_user_post(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
@@ -87,7 +148,7 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
 # --------------------------------
 # User Update endpoint
 # -------------------------------
-@router.patch("/{user_id}", response_model=UserResponse)
+@router.patch("/{user_id}", response_model=UserPrivate)
 async def user_update(
     user_id: int, update_data: UserUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
