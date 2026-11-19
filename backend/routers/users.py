@@ -49,7 +49,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
     new_user = models.User(
         username=user.username,
         email=user.email.lower(),
-        hash_password_hash=hash_password(user.password),
+        password_hash=hash_password(user.password),
     )
     db.add(new_user)
     await db.commit()
@@ -73,10 +73,10 @@ async def login_for_access_token(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     result = await db.execute(
-        select(models.User).where(func.lower(models.User.email))
-        == form_data.username.lower()
+        select(models.User).where(func.lower(models.User.email)
+        == form_data.username.lower())
     )
-    user = result.scalar().first()
+    user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,7 +90,6 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-##############################################################################################################################
 @router.get("/me", response_model=UserPrivate)
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
@@ -106,10 +105,15 @@ async def get_current_user(
     try:
         user_id: int = int(user_id)
     except (TypeError, ValueError):
-        raise HTTPException
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,details="Invalid or broken token",headers={"WWW-Authenticate":"Bearer"})
+    result = await db.execute(select(models.User).where(models.User.id) == user_id)
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="User not Found",headers={"WWW-Authenticate":"Bearer"})
+
+    return user
 
 
-#############################################################################################################################
 
 
 # --------------------------------------
@@ -161,7 +165,7 @@ async def user_update(
 
     if update_data.username is not None and update_data.username != user.username:
         result = await db.execute(
-            select(models.User).where(models.User.username == update_data.username)
+            select(models.User).where(func.lower(models.User.username )== update_data.username.lower())
         )
         existing_user = result.scalars().first()
         if existing_user:
@@ -172,7 +176,7 @@ async def user_update(
 
     if update_data.email is not None and update_data.email != user.email:
         result = await db.execute(
-            select(models.User).where(models.User.email == update_data.email)
+            select(models.User).where(func.lower(models.User.email) == update_data.email.lower())
         )
         existing_email = result.scalars().first()
         if existing_email:
