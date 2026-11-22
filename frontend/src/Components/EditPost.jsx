@@ -22,7 +22,7 @@ export default function EditPost({
     
 
     try {
-      const response = await mainApi.patch(`/${post.id}`, postData);
+      const response = await mainApi.patch(`/posts/${post.id}`, postData);
       setStateMessage(`Post editted Succesfully`);
       setMessageStatus(response.status);
       setStatusText(response.statusText);

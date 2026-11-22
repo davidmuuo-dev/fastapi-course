@@ -7,7 +7,7 @@ export default function Posts() {
     useEffect(() => {
         async function getPosts() {
             try {
-                const response = await mainApi.get("/");
+                const response = await mainApi.get("/posts");
                 setPosts(response.data);
             } catch (error) {
                 console.error(error);

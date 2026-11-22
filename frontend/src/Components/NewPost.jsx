@@ -18,7 +18,7 @@ export default function DataPopup({
     postData.user_id = 3;
 
     try {
-      const response = await mainApi.post("", postData);
+      const response = await mainApi.post("/posts", postData);
       setStateMessage(`Post ${response.statusText} Succesfully`);
       setMessageStatus(response.status);
       setStatusText(response.statusText);

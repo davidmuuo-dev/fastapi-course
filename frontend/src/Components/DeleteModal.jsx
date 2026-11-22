@@ -6,7 +6,7 @@ export default function DeleteModal({openDeleteModal,setOpenDeleteModal,post,set
     }
      const handleDelete = async ()=> {
       try {
-      const response = await mainApi.delete(`/${post.id}`);
+      const response = await mainApi.delete(`/posts/${post.id}`);
       setStateMessage(`Post Deleted Succesfully`);
       setMessageStatus(response.status);
       setStatusText(response.statusText);

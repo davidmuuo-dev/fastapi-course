@@ -18,7 +18,7 @@ export default function Post({setStateMessage,setState,setOpenMessageModal,setMe
       try {
         setLoading(true);
         setError(null);
-        const response = await mainApi.get(`/${post_id}`);
+        const response = await mainApi.get(`/posts/${post_id}`);
         setPost(response.data);
       } catch (error) {
         const detail = error.response?.data?.detail;
