@@ -5,15 +5,16 @@ import mainApi from "../APIs.jsx";
 export default function Login() {
   const loginForm = useRef(null);
   ////////////////////////////////////////////////////////
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     try {
       const form_data = new FormData(loginForm.current);
-      const response = mainApi.post("/users/token", form_data);
-      if(response.ok){
-        localStorage.getItem("access_token",response.data.access_token)
+      const response = await mainApi.post("/users/token", form_data);
+      if (response.status == 200){
+        localStorage.setItem("access_token",response.data.access_token)
+        console.log(response.status);
       }
-      console.log(response);
+      
     } catch (error) {
       console.log(error.response?.data);
     }

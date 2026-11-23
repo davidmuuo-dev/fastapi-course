@@ -5,9 +5,8 @@ import models
 import sqlalchemy.orm
 from auth import (
     create_access_token,
+    currentUser,
     hash_password,
-    oauth2_scheme,
-    verify_access_token,
     verify_password,
 )
 from config import settings
@@ -73,8 +72,9 @@ async def login_for_access_token(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     result = await db.execute(
-        select(models.User).where(func.lower(models.User.email)
-        == form_data.username.lower())
+        select(models.User).where(
+            func.lower(models.User.email) == form_data.username.lower()
+        )
     )
     user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.password_hash):
@@ -91,29 +91,9 @@ async def login_for_access_token(
 
 
 @router.get("/me", response_model=UserPrivate)
-async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or Expired Token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    try:
-        user_id: int = int(user_id)
-    except (TypeError, ValueError):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,details="Invalid or broken token",headers={"WWW-Authenticate":"Bearer"})
-    result = await db.execute(select(models.User).where(models.User.id) == user_id)
-    user = result.scalars().first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="User not Found",headers={"WWW-Authenticate":"Bearer"})
+async def get_current_user(current_user: currentUser):
 
-    return user
-
-
+    return current_user
 
 
 # --------------------------------------
@@ -154,7 +134,7 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
 # -------------------------------
 @router.patch("/{user_id}", response_model=UserPrivate)
 async def user_update(
-    user_id: int, update_data: UserUpdate, db: Annotated[AsyncSession, Depends(get_db)]
+    user_id: int, update_data: UserUpdate,current_user:currentUser, db: Annotated[AsyncSession, Depends(get_db)]
 ):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
@@ -165,7 +145,9 @@ async def user_update(
 
     if update_data.username is not None and update_data.username != user.username:
         result = await db.execute(
-            select(models.User).where(func.lower(models.User.username )== update_data.username.lower())
+            select(models.User).where(
+                func.lower(models.User.username) == update_data.username.lower()
+            )
         )
         existing_user = result.scalars().first()
         if existing_user:
@@ -176,7 +158,9 @@ async def user_update(
 
     if update_data.email is not None and update_data.email != user.email:
         result = await db.execute(
-            select(models.User).where(func.lower(models.User.email) == update_data.email.lower())
+            select(models.User).where(
+                func.lower(models.User.email) == update_data.email.lower()
+            )
         )
         existing_email = result.scalars().first()
         if existing_email:
