@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import Button from "./Button";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import mainApi from "../APIs.jsx";
+import { useCurrentUser } from "../UserContext.jsx";
 export default function Login({
   setOpenMessageModal,
   setStateMessage,
@@ -10,8 +11,11 @@ export default function Login({
   setState,
 }) {
   const loginForm = useRef(null);
+  const { fetchUser } = useCurrentUser();
+  const navigate = useNavigate();
   async function handleLogin(e) {
     e.preventDefault();
+
     try {
       const form_data = new FormData(loginForm.current);
       const response = await mainApi.post("/users/token", form_data);
@@ -23,6 +27,9 @@ export default function Login({
         setStatusText(response.statusText);
         setOpenMessageModal(true);
         setState("success");
+        fetchUser();
+        navigate("/");
+        //setOpenMessageModal(false);
       }
     } catch (error) {
       console.log(error.response?.data);

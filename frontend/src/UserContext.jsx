@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import mainApi from "./APIs";
+import { useNavigate } from "react-router";
 
  
 const CurrentUserContext = createContext(null);
@@ -7,7 +8,13 @@ const CurrentUserContext = createContext(null);
 // 1. Create a Provider Component to wrap your app
 export function UserProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(() => Boolean(localStorage.getItem("access_token")));
+  function logout(){
+    localStorage.removeItem("access_token")
+    setCurrentUser(null)
+    navigate("/login",{replace: true})
+  }
   const fetchUser = useCallback( async () => {
       const token = localStorage.getItem("access_token");
       if (!token) {
@@ -22,7 +29,6 @@ export function UserProvider({ children }) {
         if (response.status === 200) {
           setCurrentUser(response.data);
         }
-        localStorage.removeItem("access_token")
       } catch (error) {
         console.error("Failed to fetch user:", error);
       } finally {
@@ -37,7 +43,7 @@ export function UserProvider({ children }) {
   }, [fetchUser]); // Empty array ensures this runs only once on mount
 
   return (
-    <CurrentUserContext.Provider value={{ currentUser, setCurrentUser, loading,fetchUser }}>
+    <CurrentUserContext.Provider value={{ logout, currentUser, setCurrentUser, loading,fetchUser }}>
       {children}
     </CurrentUserContext.Provider>
   );
@@ -48,3 +54,4 @@ export function UserProvider({ children }) {
 export function useCurrentUser() {
   return useContext(CurrentUserContext);
 }
+

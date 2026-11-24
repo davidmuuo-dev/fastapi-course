@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes } from "react-router";
 import { Route } from "react-router";
 import Header from "./Components/Header.jsx";
@@ -10,6 +10,7 @@ import NewPost from "./Components/NewPost.jsx";
 import RequestMessage from "./Components/RequestMessage.jsx";
 import Register from "./Components/Register.jsx";
 import Login from "./Components/Login.jsx";
+import { useCurrentUser } from "./UserContext.jsx";
 
 function App() {
   const [loginStatus, setLoginStatus] = useState(true);
@@ -22,6 +23,8 @@ function App() {
   const handleOpenNewPostForm = () => {
     setnewPostModalOpen(true);
   };
+  const {fetchUser} = useCurrentUser()
+  useEffect(() => {fetchUser()},[fetchUser] )
   return (
     <div className="min-h-screen relative min-w-screen bg-slate-950">
       <RequestMessage
@@ -51,7 +54,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Posts />}></Route>
         <Route path="/posts" element={<Posts />}></Route>
-        <Route path="/register" element={<Register />}></Route>
+        <Route path="/register" element={<Register setOpenMessageModal={setOpenMessageModal} setStatusText={setStatusText} setStateMessage={setStateMessage} setMessageStatus={setMessageStatus} />} ></Route>
         <Route
           path="/login"
           element={<Login setOpenMessageModal={setOpenMessageModal} setState={setState} setStateMessage={setStateMessage} setMessageStatus={setMessageStatus} setStatusText={setStatusText} />}
