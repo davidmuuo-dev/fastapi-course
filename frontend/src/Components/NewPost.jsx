@@ -24,7 +24,6 @@ export default function DataPopup({
       setStatusText(response.statusText);
       setnewPostModalOpen(false);
       setOpenMessageModal(true);
-      console.log(response);
     } catch (error) {
       if (error.response) {
         const detail = error.response.data?.detail;

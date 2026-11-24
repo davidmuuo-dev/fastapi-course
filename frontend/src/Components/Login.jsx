@@ -2,24 +2,61 @@ import { useRef } from "react";
 import Button from "./Button";
 import { Link } from "react-router";
 import mainApi from "../APIs.jsx";
-export default function Login() {
+export default function Login({
+  setOpenMessageModal,
+  setStateMessage,
+  setMessageStatus,
+  setStatusText,
+  setState,
+}) {
   const loginForm = useRef(null);
-  ////////////////////////////////////////////////////////
   async function handleLogin(e) {
     e.preventDefault();
     try {
       const form_data = new FormData(loginForm.current);
       const response = await mainApi.post("/users/token", form_data);
-      if (response.status == 200){
-        localStorage.setItem("access_token",response.data.access_token)
-        console.log(response.status);
+      if (response.status == 200) {
+        localStorage.setItem("access_token", response.data.access_token);
+        console.log(response);
+        setStateMessage(`Logged in Succesfully`);
+        setMessageStatus(response.status);
+        setStatusText(response.statusText);
+        setOpenMessageModal(true);
+        setState("success");
       }
-      
     } catch (error) {
       console.log(error.response?.data);
+      if (error.response) {
+        const detail = error.response.data?.detail;
+
+        let message;
+
+        if (typeof detail === "string") {
+          message = detail;
+        } else if (Array.isArray(detail)) {
+          message = detail.map((err) => err.msg).join(", ");
+        } else {
+          message = "Something went wrong";
+        }
+
+        setStateMessage(message);
+        setMessageStatus(error.response.status);
+        setStatusText(error.response.statusText);
+      } else if (error.request) {
+        setStateMessage("Server is not responding");
+        setMessageStatus(null);
+        setStatusText("Network Error");
+      } else {
+        setStateMessage(error.message || "Something went wrong");
+        setMessageStatus(null);
+        setStatusText("Request Error");
+      }
+      setState("error");
+      setOpenMessageModal(true);
+
+      console.log(error.response || error.request || error.message);
     }
   }
-  ///////////////////////////////////////////////////
   return (
     <>
       <div className="size-full flex justify-center items-center ">

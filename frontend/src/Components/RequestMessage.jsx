@@ -2,7 +2,7 @@ import Button from "./Button.jsx"
 export default function RequestMessage({ state, stateMessage,openMessageModal,setOpenMessageModal,messageStatus,statusText }) {
     const handleCloseModal = () => {
         setOpenMessageModal(false);
-        window.location.reload()
+        //window.location.reload()
     };
     return (
        <>

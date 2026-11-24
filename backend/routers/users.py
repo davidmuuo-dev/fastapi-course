@@ -80,7 +80,7 @@ async def login_for_access_token(
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect Password",
+            detail="Incorrect Password or email.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
@@ -92,7 +92,6 @@ async def login_for_access_token(
 
 @router.get("/me", response_model=UserPrivate)
 async def get_current_user(current_user: currentUser):
-
     return current_user
 
 
