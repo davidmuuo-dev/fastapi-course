@@ -5,14 +5,22 @@ import Button from "./Button.jsx";
 import Error from "./Error.jsx";
 import EditPost from "./EditPost.jsx";
 import DeleteModal from "./DeleteModal.jsx";
+import { useCurrentUser } from "../UserContext.jsx";
 
-export default function Post({setStateMessage,setState,setOpenMessageModal,setMessageStatus,setStatusText}) {
+export default function Post({
+  setStateMessage,
+  setState,
+  setOpenMessageModal,
+  setMessageStatus,
+  setStatusText,
+}) {
   const [post, setPost] = useState([]);
   const [loading, setLoading] = useState(true);
   const { post_id } = useParams();
   const [error, setError] = useState(null);
   const [editPostModalOpen, setEditPostModalOpen] = useState(false);
-  const [openDeleteModal,setOpenDeleteModal] = useState(false)
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const { currentUser } = useCurrentUser();
   useEffect(() => {
     async function getPosts() {
       try {
@@ -64,8 +72,26 @@ export default function Post({setStateMessage,setState,setOpenMessageModal,setMe
           </p>
         ) : (
           <div className=" flex flex-col gap-2 p-2">
-            <EditPost post={post} setMessageStatus={setMessageStatus} setStatusText={setStatusText} editPostModalOpen={editPostModalOpen} setEditPostModalOpen={setEditPostModalOpen} setStateMessage={setStateMessage} setState={setState} setOpenMessageModal={setOpenMessageModal} />
-            <DeleteModal setStateMessage={setStateMessage} setMessageStatus={setMessageStatus} setStatusText={setStatusText} setOpenMessageModal={setOpenMessageModal} setState={setState} setOpenDeleteModal={setOpenDeleteModal} openDeleteModal={openDeleteModal} post={post}  />
+            <EditPost
+              post={post}
+              setMessageStatus={setMessageStatus}
+              setStatusText={setStatusText}
+              editPostModalOpen={editPostModalOpen}
+              setEditPostModalOpen={setEditPostModalOpen}
+              setStateMessage={setStateMessage}
+              setState={setState}
+              setOpenMessageModal={setOpenMessageModal}
+            />
+            <DeleteModal
+              setStateMessage={setStateMessage}
+              setMessageStatus={setMessageStatus}
+              setStatusText={setStatusText}
+              setOpenMessageModal={setOpenMessageModal}
+              setState={setState}
+              setOpenDeleteModal={setOpenDeleteModal}
+              openDeleteModal={openDeleteModal}
+              post={post}
+            />
             <div
               className="bg-gray-200 rounded-lg p-2 md:max-w-150"
               key={post.id}
@@ -95,17 +121,22 @@ export default function Post({setStateMessage,setState,setOpenMessageModal,setMe
                   Back
                 </Button>
                 <div className="flex gap-2 items-center">
-                  {post.user_id == 3 && (
-                    <Button
-                      onClick={() => setEditPostModalOpen(true)}
-                      className="px-5 py-1 font-bold text-sky-500 "
-                    >
-                      Edit
-                    </Button>
+                  {post.user_id == currentUser.id && (
+                    <div className="flex justify-between">
+                      <Button
+                        onClick={() => setEditPostModalOpen(true)}
+                        className="px-5 py-1 font-bold text-sky-500 "
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => setOpenDeleteModal(true)}
+                        className="font-bold px-5 py-1 text-red-500 "
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   )}
-                  <Button onClick={()=> setOpenDeleteModal(true)} className="font-bold px-5 py-1 text-red-500 ">
-                    Delete
-                  </Button>
                 </div>
               </div>
             </div>

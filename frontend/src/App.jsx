@@ -11,8 +11,20 @@ import RequestMessage from "./Components/RequestMessage.jsx";
 import Register from "./Components/Register.jsx";
 import Login from "./Components/Login.jsx";
 import { useCurrentUser } from "./UserContext.jsx";
-
+import mainApi from "./APIs.jsx";
 function App() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  async function getPosts() {
+    try {
+      const response = await mainApi.get("/posts");
+      setPosts(response.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
   const [loginStatus, setLoginStatus] = useState(true);
   const [openMessageModal, setOpenMessageModal] = useState(false);
   const [newPostModalOpen, setnewPostModalOpen] = useState(false);
@@ -23,8 +35,10 @@ function App() {
   const handleOpenNewPostForm = () => {
     setnewPostModalOpen(true);
   };
-  const {fetchUser} = useCurrentUser()
-  useEffect(() => {fetchUser()},[fetchUser] )
+  const { fetchUser } = useCurrentUser();
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
   return (
     <div className="min-h-screen relative min-w-screen bg-slate-950">
       <RequestMessage
@@ -44,6 +58,7 @@ function App() {
         setState={setState}
         openMessageModal={openMessageModal}
         setOpenMessageModal={setOpenMessageModal}
+        getPosts={getPosts}
       />
 
       <Header
@@ -52,12 +67,53 @@ function App() {
         onClick={handleOpenNewPostForm}
       />
       <Routes>
-        <Route path="/" element={<Posts />}></Route>
-        <Route path="/posts" element={<Posts />}></Route>
-        <Route path="/register" element={<Register setOpenMessageModal={setOpenMessageModal} setStatusText={setStatusText} setStateMessage={setStateMessage} setMessageStatus={setMessageStatus} />} ></Route>
+        <Route
+          path="/"
+          element={
+            <Posts
+              posts={posts}
+              setPosts={setPosts}
+              loading={loading}
+              setLoading={setLoading}
+              getPosts={getPosts}
+            />
+          }
+        ></Route>
+        <Route
+          path="/posts"
+          element={
+            <Posts
+              posts={posts}
+              setPosts={setPosts}
+              loading={loading}
+              setLoading={setLoading}
+              getPosts={getPosts}
+            />
+          }
+        ></Route>
+        <Route
+          path="/register"
+          element={
+            <Register
+              setState={setState}
+              setOpenMessageModal={setOpenMessageModal}
+              setStatusText={setStatusText}
+              setStateMessage={setStateMessage}
+              setMessageStatus={setMessageStatus}
+            />
+          }
+        ></Route>
         <Route
           path="/login"
-          element={<Login setOpenMessageModal={setOpenMessageModal} setState={setState} setStateMessage={setStateMessage} setMessageStatus={setMessageStatus} setStatusText={setStatusText} />}
+          element={
+            <Login
+              setOpenMessageModal={setOpenMessageModal}
+              setState={setState}
+              setStateMessage={setStateMessage}
+              setMessageStatus={setMessageStatus}
+              setStatusText={setStatusText}
+            />
+          }
         ></Route>
         <Route
           path="*"

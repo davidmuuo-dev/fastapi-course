@@ -9,13 +9,13 @@ export default function DataPopup({
   setOpenMessageModal,
   setMessageStatus,
   setStatusText,
+  getPosts
 }) {
   const newPost = useRef(null);
   async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(newPost.current);
     const postData = Object.fromEntries(formData.entries());
-    postData.user_id = 3;
 
     try {
       const response = await mainApi.post("/posts", postData);
@@ -24,6 +24,7 @@ export default function DataPopup({
       setStatusText(response.statusText);
       setnewPostModalOpen(false);
       setOpenMessageModal(true);
+      getPosts()
     } catch (error) {
       if (error.response) {
         const detail = error.response.data?.detail;
