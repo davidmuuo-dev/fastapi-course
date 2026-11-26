@@ -46,7 +46,7 @@ async def get_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
 # -------------------------------
 @router.post("", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
 async def create_post(post: PostCreate, current_user:currentUser, db: Annotated[AsyncSession, Depends(get_db)]):
-    new_post = models.Post(title=post.title, content=post.content, user_id=current_user.id)
+    new_post = models.Post(title=post.title.capitalize(), content=post.content.capitalize(), user_id=current_user.id)
     db.add(new_post)
     await db.commit()
     await db.refresh(new_post)

@@ -76,7 +76,7 @@ export default function Login({
           <Input type="email" name="username" placeholder="Email..." />
           <Input type="password" name="password" placeholder="Pasword..." />
           <div className="flex justify-between p-2">
-            <Button className="bg-gray-200 px-3 py-1" type="button">
+            <Button onClick={() => navigate("/")} className="bg-gray-200 px-3 py-1" type="button">
               Cancel
             </Button>
             <Button className="bg-gray-400 px-3 py-1" type="submit">

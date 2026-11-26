@@ -1,21 +1,27 @@
 import { useEffect } from "react";
 import { useCurrentUser } from "../UserContext.jsx";
 import Button from "./Button.jsx";
+import logo1 from "../assets/logo1.jpg";
 
 export default function Header({ onClick }) {
-  const { currentUser, fetchUser,logout } = useCurrentUser();
+  const { currentUser, fetchUser, logout } = useCurrentUser();
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
   return (
     <header className="flex items-center justify-between border-b border-gray-200">
-      <p className="text-white font-black">LOGO</p>
+      <img src={logo1} alt="Company logo" className="size-32 rounded-full" />
 
       <div className="flex gap-2 p-1">
         {currentUser ? (
           <>
-          <p className="text-gray-300">{currentUser.email}</p>
-            <Button onClick={()=>{logout()}} className="bg-gray-600 text-gray-100 px-5 py-1">
+            <p className="text-gray-300">{currentUser.email}</p>
+            <Button
+              onClick={() => {
+                logout();
+              }}
+              className="bg-gray-600 text-gray-100 px-5 py-1"
+            >
               Logout
             </Button>
 
@@ -25,7 +31,6 @@ export default function Header({ onClick }) {
             >
               New Post
             </Button>
-
           </>
         ) : (
           <div className="flex gap-2">

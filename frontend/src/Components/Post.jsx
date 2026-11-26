@@ -14,7 +14,7 @@ export default function Post({
   setMessageStatus,
   setStatusText,
 }) {
-  const [post, setPost] = useState([]);
+  const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const { post_id } = useParams();
   const [error, setError] = useState(null);
@@ -96,6 +96,12 @@ export default function Post({
               className="bg-gray-200 rounded-lg p-2 md:max-w-150"
               key={post.id}
             >
+              <img
+                src={`${mainApi.defaults.baseURL}${post.author?.image_path}`}
+                alt={post.author?.username}
+                className="w-15 h-15 rounded-full object-cover"
+              />
+
               <div className="flex justify-between">
                 <div className="flex justify-baseline gap-0.5 flex-col">
                   <p className="font-medium text-blue-500">{post.title}</p>
@@ -121,7 +127,7 @@ export default function Post({
                   Back
                 </Button>
                 <div className="flex gap-2 items-center">
-                  {post.user_id == currentUser.id && (
+                  {post.user_id === currentUser?.id && (
                     <div className="flex justify-between">
                       <Button
                         onClick={() => setEditPostModalOpen(true)}

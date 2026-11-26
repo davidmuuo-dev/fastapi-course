@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from routers import posts, users
 
 
@@ -15,6 +16,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
 origins = ["http://localhost:5173"]
 app.add_middleware(
     CORSMiddleware,
@@ -25,3 +27,4 @@ app.add_middleware(
 )
 app.include_router(users.router, prefix="/users", tags=["USERS"])
 app.include_router(posts.router, prefix="/posts", tags=["POSTS"])
+app.mount("/static", StaticFiles(directory="static"), name="static")

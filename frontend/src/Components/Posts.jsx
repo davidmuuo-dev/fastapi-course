@@ -31,16 +31,22 @@ export default function Posts({ posts, loading, getPosts }) {
             </svg>
           </div>
         ) : (
-          <div className=" flex flex-col gap-2 p-2">
+          <div className="  gap-2 p-2 grid grid-cols-[repeat(auto-fit,minmax(350px,1fr))] ">
             {posts.map((post) => {
               return (
+               <div  className="bg-gray-200 backdrop-blur-xl rounded-lg p-4 ">
+                 <div>
+                    <img
+                      src={`http://localhost:8000${post.author?.image_path}`}
+                      alt={post.author?.username}
+                      className="w-15 h-15 rounded-full object-cover"
+                    />
+                  </div>
                 <div
-                  className="bg-gray-200 backdrop-blur-xl rounded-lg p-2 md:max-w-200"
+                 
                   key={post.id}
                 >
-                  <div>
-                    <img src={post.image_path} />
-                  </div>
+                  
                   <div className="flex justify-between">
                     <div className="flex justify-baseline gap-0.5 flex-col">
                       <Link to={`/posts/${post.id}`}>
@@ -49,9 +55,6 @@ export default function Posts({ posts, loading, getPosts }) {
                           {post.title}
                         </p>
                       </Link>
-                      <p className="text-xs text-gray-900 underline">
-                        {post.author.username}
-                      </p>
                     </div>
                     <div className="flex flex-col items-end">
                       <p className="text-xs text-gray-900">
@@ -63,7 +66,11 @@ export default function Posts({ posts, loading, getPosts }) {
                     </div>
                   </div>
                   <p className="mt-2 text-sm line-clamp-1">{post.content}</p>
+                  <p className="text-xs text-gray-900 underline">
+                    {post.author.username}
+                  </p>
                 </div>
+               </div>
               );
             })}{" "}
           </div>
